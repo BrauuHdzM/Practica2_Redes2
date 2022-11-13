@@ -14,12 +14,13 @@ import java.io.File;
 public class Practica2 {
 
     public static void main(String[] args) {
-        File prueba = new File("C:\\Users\\brauu\\Documents\\NetBeansProjects\\Practica2\\catalogo\\Sparks.mp3");
+        File prueba = new File("catalogo\\Sparks.mp3");
         Cancion cancion= new Cancion(prueba,1,350);
         System.out.println(cancion.album);
         System.out.println(cancion.ano);
         System.out.println(cancion.autor);
         System.out.println(cancion.duracion);
         System.out.println(cancion.nombre);
+        System.out.println("This is my pull");
     }
 }
