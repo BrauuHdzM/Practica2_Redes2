@@ -26,6 +26,7 @@ public class Cancion implements Serializable{
     String ano;
     double precio;
     int id;
+    String path;
     
 public Cancion(String nombre, String autor, String album, String duracion, String ano, float precio, int id){
     this.nombre=nombre;
