@@ -24,7 +24,7 @@ public class Cancion implements Serializable{
     String album;
     String duracion;
     String ano;
-    float precio;
+    double precio;
     int id;
     
 public Cancion(String nombre, String autor, String album, String duracion, String ano, float precio, int id){
@@ -37,7 +37,7 @@ public Cancion(String nombre, String autor, String album, String duracion, Strin
     this.id=id;
 }
 
-public Cancion(File file, float precio, int id){
+public Cancion(File file, double precio, int id){
         try {
         InputStream input = new FileInputStream(file);
         ContentHandler handler = new DefaultHandler();
