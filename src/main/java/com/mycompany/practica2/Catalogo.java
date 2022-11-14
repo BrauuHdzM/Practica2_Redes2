@@ -48,7 +48,7 @@ public class Catalogo {
         String formatoPrint = "| %-4d | %-30s | %-20s | %-25s | %-5s | %-8s | %-10s |%n";
 
         System.out.format("+------+--------------------------------+----------------------+---------------------------+-------+----------+------------+%n");
-        System.out.format("| ID   | Nombre                         |      Autor           |          Album            |  Ano  | Duracion |   Precio   |%n");
+        System.out.format("| ID   | Nombre                         |      Autor           |          Album            |  Año  | Duración |   Precio   |%n");
         System.out.format("+------+--------------------------------+----------------------+---------------------------+-------+----------+------------+%n");
         
         
@@ -57,6 +57,16 @@ public class Catalogo {
             System.out.format("+------+--------------------------------+----------------------+---------------------------+-------+----------+------------+%n");
         }
         
+    }
+    
+    
+    public Cancion buscarCancion(int idCancion){
+        for(Cancion c: this.Canciones){
+            if(idCancion==c.id){
+                return c;
+            }
+        }
+        return null;
     }
     
     
