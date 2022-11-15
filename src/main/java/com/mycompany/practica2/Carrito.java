@@ -4,13 +4,14 @@
  */
 package com.mycompany.practica2;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
  *
  * @author mauri
  */
-public class Carrito {
+public class Carrito implements Serializable {
     
     ArrayList<Cancion> Canciones;
     double costoTotal;

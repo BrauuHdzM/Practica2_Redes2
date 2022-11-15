@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import org.json.simple.JSONArray;
@@ -19,7 +20,7 @@ import org.json.simple.parser.ParseException;
  *
  * @author Mauricio Beltrán
  */
-public class Catalogo {
+public class Catalogo implements Serializable{
     
     ArrayList<Cancion> Canciones;
     

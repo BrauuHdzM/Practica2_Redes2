@@ -59,6 +59,7 @@ public Cancion(File file, double precio, int id){
         this.duracion=""+tiempo2/60+":"+tiempo2%60;
         this.precio=precio;
         this.id=id;
+        this.path= file.getAbsolutePath();
         
         } catch (FileNotFoundException e) {
         e.printStackTrace();
