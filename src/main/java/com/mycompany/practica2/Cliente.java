@@ -77,11 +77,16 @@ public class Cliente {
             case 1: 
                 System.out.println("Ingresa el ID de la cancion a eliminar");
                 carrito.eliminarCancion(new Scanner(System.in).nextInt());
+                carrito.mostrarCarrito();
                 break;
             case 2:
                 enviarCarrito(carrito);
                 break;
         }
+    }
+    
+    public void descargarCanciones(){
+        
     }
     
     public static void conexion() throws UnknownHostException, SocketException, IOException{
@@ -129,7 +134,7 @@ public class Cliente {
     }
     
     public static void enviarCarrito(Carrito carrito){
-        int puerto = 8000;
+        int puerto = 8001;
         DatagramPacket dp= null;
         DatagramSocket c = null;
         ObjectOutputStream oos=null;

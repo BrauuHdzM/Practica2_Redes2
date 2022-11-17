@@ -20,28 +20,33 @@ import java.net.SocketException;
  */
 public class Servidor {
     public static void main(String[] args) throws SocketException{
-        int pto=1234;
-        DatagramSocket s = new DatagramSocket(pto);
-        s.setReuseAddress(true);
+        
+        
         while(true){
             try{  
                 
-                String msj="";
                 
-               // s.setBroadcast(true);
-                System.out.println("Servidor iniciado... espedando datagramas..");
-                byte[] b=new byte[65535];
-                DatagramPacket p = new DatagramPacket(b,b.length);
-                s.receive(p);
-                msj = new String(p.getData(),0,p.getLength());
-                System.out.println("Se ha recibido datagrama desde "+p.getAddress()+":"+p.getPort()+" con el mensaje:"+msj);
-                
+                waitConnection();
                 enviarCatalogo();
                 getCarrito();
             }catch(Exception e){
                 e.printStackTrace();
             }//catch
         }
+    }
+    
+    public static void waitConnection() throws SocketException, IOException{
+        int pto=1234;
+        DatagramSocket s = new DatagramSocket(pto);
+        s.setReuseAddress(true);
+        String msj="";
+        
+        System.out.println("Servidor iniciado... espedando conexion..");
+        byte[] b=new byte[65535];
+        DatagramPacket p = new DatagramPacket(b,b.length);
+        s.receive(p);
+        msj = new String(p.getData(),0,p.getLength());
+        System.out.println("Se ha recibido conexion desde "+p.getAddress()+":"+p.getPort());
     }
     
     public static void enviarCatalogo(){
@@ -62,6 +67,7 @@ public class Servidor {
             oos = new ObjectOutputStream(bos);
             byte[] buf= new byte[1024];
             catalogo = new Catalogo();
+            System.out.println("Enviando Catalogo...");
             oos.writeObject(catalogo);
             oos.flush();
             buf = bos.toByteArray();
@@ -69,11 +75,11 @@ public class Servidor {
             c.send(dp);
             oos.close();
         }catch(Exception e){System.err.println(e);}
-      System.out.println("Termina el contenido del datagrama...");
+      System.out.println("Catalogo enviado");
     }
     
     public static Carrito getCarrito(){
-        int puerto = 8000;
+        int puerto = 8001;
         DatagramPacket dp= null;
         DatagramSocket s = null;
         //ObjectOutputStream oos=null;
@@ -83,16 +89,13 @@ public class Servidor {
 
         try{
             s = new DatagramSocket(puerto);
-            System.out.println("Servidor UDP iniciado en el puerto "+s.getLocalPort());
-            System.out.println("Recibiendo datos...");
+            System.out.println("Esperando Carrito...");
             
             dp = new DatagramPacket(new byte[1024],1024);
             s.receive(dp);
-            System.out.println("Datagrama recibido... extrayendo informaciĂłn");
-            System.out.println("Host remoto:"+dp.getAddress().getHostAddress()+":"+dp.getPort());
-            System.out.println("Datos del paquete:");
             ois = new ObjectInputStream(new ByteArrayInputStream(dp.getData()));
             carrito = (Carrito)ois.readObject();
+            System.out.println("Carrito recibido");
             ois.close();
             
             s.close();
