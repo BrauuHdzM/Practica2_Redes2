@@ -17,7 +17,8 @@ import org.json.simple.parser.ParseException;
 public class Practica2 {
 
     public static void main(String[] args) throws IOException, FileNotFoundException, ParseException  {
-
+        File f = new File("catalogo\\Sparks.mp3");
+        System.out.println(f.getAbsolutePath());
         Catalogo cat = new Catalogo();
         cat.mostrarCatalogo();
         
