@@ -28,39 +28,23 @@ import org.json.simple.parser.ParseException;
  */
 public class Cliente {
     public static void main(String[] args) throws SocketException, IOException {
-        /*boolean flag = true;
+        int ptoDst=8000;
+        String dirDst="127.0.0.1";
+        DatagramSocket s = new DatagramSocket(8001);
+        s.setReuseAddress(true);
         
-            try{
-                DatagramSocket socket = new DatagramSocket(8000);
-                byte[] receiveFileName = new byte[1024]; // Where we store the data of datagram of the name
-                for(int a =0; a<2;a++){
-                    DatagramPacket receiveFileNamePacket = new DatagramPacket(receiveFileName, receiveFileName.length);
-                    socket.receive(receiveFileNamePacket); // Receive the datagram with the name of the file
-
-                    System.out.println("Receiving file name");
-                    byte [] data = receiveFileNamePacket.getData(); // Reading the name in bytes
-                    String fileName = new String(data, 0, receiveFileNamePacket.getLength()); // Converting the name to string
-
-                    System.out.println("Creating file");
-                    File f = new File ("libreria\\" + fileName); // Creating the file
-                    FileOutputStream outToFile = new FileOutputStream(f);
-                    receiveFile(outToFile, socket);
-                }
-            }catch(Exception e){
-                System.out.println(e);
-            }*/
-        
-        
-        
-        conexion();
-        Catalogo catalogo = getCatalogo();//esta variable debe de ser asignada al catalogo que se reciba del servidor
-        Carrito carrito = new Carrito();
         boolean varSalir = true;
-        System.out.println("holi ");
         
         while(varSalir){
+            conexion(ptoDst, dirDst, s);
+            Catalogo catalogo = getCatalogo(s);//esta variable debe de ser asignada al catalogo que se reciba del servidor       
+            Carrito carrito = new Carrito();
+            boolean varSalir2 =true;
+            while(varSalir2){
             switch(menu()){
+                
                 case 1:
+                    
                     catalogo.mostrarCatalogo();
                 break;
                 case 2:
@@ -70,12 +54,12 @@ public class Cliente {
                     carrito.mostrarCarrito();
                 break;
                 case 3:
-                    menuCarrito(carrito);
+                    varSalir2 = menuCarrito(carrito, s);
                 break;
                 case 4:
                     varSalir=false;
                  
-            
+            }
             }
         }
         
@@ -91,7 +75,7 @@ public class Cliente {
                            4.Salir""");
         return sc.nextInt();
     }
-    public static void  menuCarrito(Carrito carrito){
+    public static boolean  menuCarrito(Carrito carrito, DatagramSocket s){
         Scanner sc = new Scanner(System.in);
         System.out.println("""
                            Ingrese una opcion:
@@ -106,38 +90,38 @@ public class Cliente {
                 carrito.mostrarCarrito();
                 break;
             case 2:
-                enviarCarrito(carrito);
+                enviarCarrito(carrito, s);
                 recibirCancion(carrito);
-                break;
+                return false;
+                
         }
+        return true;
     }
     
     public void descargarCanciones(){
         
     }
     
-    public static void conexion() throws UnknownHostException, SocketException, IOException{
-        int pto=1234;
-        String dir="127.0.0.1";
+    public static void conexion(int pto, String dir, DatagramSocket cl) throws UnknownHostException, SocketException, IOException{
+        
         InetAddress dst= InetAddress.getByName(dir);
-        InetAddress org= InetAddress.getLocalHost();
-        DatagramSocket cl = new DatagramSocket();
         String msj = "Hola servidor";
         int tam = msj.length();
         byte[]b = msj.getBytes();
         DatagramPacket p= new DatagramPacket(b,b.length,dst,pto);
         cl.send(p);
+        System.out.println("Solicitud de conexcion enviada");
     }
     
-    public static Catalogo getCatalogo(){
-        int puerto = 8000;
+    public static Catalogo getCatalogo(DatagramSocket s){
+        //int puerto = 8000;
         DatagramPacket dp= null;
-        DatagramSocket s = null;
+        //DatagramSocket s = null;
         ObjectInputStream ois = null;
         Catalogo catalogo =null;
 
         try{
-            s = new DatagramSocket(puerto);
+            //s = new DatagramSocket(puerto);
             System.out.println("Servidor UDP iniciado en el puerto "+s.getLocalPort());
             System.out.println("Recibiendo datos...");
             
@@ -151,22 +135,22 @@ public class Cliente {
             catalogo.mostrarCatalogo();
             ois.close();
             
-            s.close();
+            //s.close();
             
         }catch(IOException | ClassNotFoundException e){System.err.println(e);}
         System.out.println("Termina el contenido del datagrama...");
         return catalogo;
     }
     
-    public static void enviarCarrito(Carrito carrito){
-        int puerto = 8001;
+    public static void enviarCarrito(Carrito carrito, DatagramSocket c){
+        int puerto = 8000;
         DatagramPacket dp= null;
-        DatagramSocket c = null;
+        //DatagramSocket c = null;
         ObjectOutputStream oos=null;
         ByteArrayOutputStream bos=null;
 
         try{
-            c = new DatagramSocket();
+            //c = new DatagramSocket();
             dp = new DatagramPacket(new byte[1024],1024);
             InetAddress direccion = InetAddress.getByName("127.0.0.1");
             dp.setAddress(direccion);

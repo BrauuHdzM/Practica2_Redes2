@@ -23,45 +23,29 @@ import java.net.SocketTimeoutException;
  */
 public class Servidor {
     public static void main(String[] args) throws SocketException{
-        /*File fa[] = new File("catalogo").listFiles();
-        for (File a : fa){
-            try{
-                DatagramSocket socket = new DatagramSocket();
-                InetAddress address = InetAddress.getByName("127.0.0.1");
-                String fileName;
-                File f = a;//new File("catalogo\\Sparks.mp3");
-                fileName = f.getName();
-                byte[] fileNameBytes = fileName.getBytes(); // File name as bytes to send it
-                DatagramPacket fileStatPacket = new DatagramPacket(fileNameBytes, fileNameBytes.length, address, 8000); // File name packet
-                
-                socket.send(fileStatPacket); // Sending the packet with the file name
-
-                byte[] fileByteArray = readFileToByteArray(f); // Array of bytes the file is made of
-                sendFile(socket, fileByteArray, address, 8000);
-            }catch(Exception e){
-                System.out.println(e);
-            }
-        }*/
         
+        
+        int pto=8000;
+        DatagramSocket s = new DatagramSocket(pto);
+        s.setReuseAddress(true);
         
         
         while(true){
             try{  
                 
                 
-                waitConnection();
-                enviarCatalogo();
-                sendCanciones(getCarrito());
+                waitConnection(s);
+                enviarCatalogo(s);
+                sendCanciones(getCarrito(s));
             }catch(Exception e){
                 e.printStackTrace();
             }//catch
         }
     }
     
-    public static void waitConnection() throws SocketException, IOException{
-        int pto=1234;
-        DatagramSocket s = new DatagramSocket(pto);
-        s.setReuseAddress(true);
+    public static void waitConnection(DatagramSocket s) throws SocketException, IOException{
+        
+        //s.setReuseAddress(true);
         String msj="";
         
         System.out.println("Servidor iniciado... espedando conexion..");
@@ -72,10 +56,10 @@ public class Servidor {
         System.out.println("Se ha recibido conexion desde "+p.getAddress()+":"+p.getPort());
     }
     
-    public static void enviarCatalogo(){
-        int puerto = 8000;
+    public static void enviarCatalogo(DatagramSocket c ){
+        int puerto = 8001;
         DatagramPacket dp= null;
-        DatagramSocket c = null;
+        //DatagramSocket c = null;
         ObjectOutputStream oos=null;
         ByteArrayOutputStream bos=null;
         Catalogo catalogo =null;
@@ -101,17 +85,17 @@ public class Servidor {
       System.out.println("Catalogo enviado");
     }
     
-    public static Carrito getCarrito(){
+    public static Carrito getCarrito(DatagramSocket s){
         int puerto = 8001;
         DatagramPacket dp= null;
-        DatagramSocket s = null;
+        //DatagramSocket s = null;
         //ObjectOutputStream oos=null;
         ObjectInputStream ois = null;
         //ByteArrayInputStream bis;
         Carrito carrito =null;
 
         try{
-            s = new DatagramSocket(puerto);
+            //s = new DatagramSocket(puerto);
             System.out.println("Esperando Carrito...");
             
             dp = new DatagramPacket(new byte[1024],1024);
@@ -121,7 +105,6 @@ public class Servidor {
             System.out.println("Carrito recibido");
             ois.close();
             
-            s.close();
             
         }catch(IOException | ClassNotFoundException e){System.err.println(e);}
         System.out.println("Termina el contenido del datagrama...");
