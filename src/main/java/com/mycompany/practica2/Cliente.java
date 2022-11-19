@@ -91,7 +91,7 @@ public class Cliente {
                 break;
             case 2:
                 enviarCarrito(carrito, s);
-                recibirCancion(carrito);
+                recibirCancion(carrito, s);
                 return false;
                 
         }
@@ -110,7 +110,7 @@ public class Cliente {
         byte[]b = msj.getBytes();
         DatagramPacket p= new DatagramPacket(b,b.length,dst,pto);
         cl.send(p);
-        System.out.println("Solicitud de conexcion enviada");
+        System.out.println("Solicitud de conexion enviada");
     }
     
     public static Catalogo getCatalogo(DatagramSocket s){
@@ -122,14 +122,12 @@ public class Cliente {
 
         try{
             //s = new DatagramSocket(puerto);
-            System.out.println("Servidor UDP iniciado en el puerto "+s.getLocalPort());
-            System.out.println("Recibiendo datos...");
+            System.out.println("Recibiendo catalogo...");
             
             dp = new DatagramPacket(new byte[1024],1024);
             s.receive(dp);
-            System.out.println("Datagrama recibido... extrayendo informaciĂłn");
-            System.out.println("Host remoto:"+dp.getAddress().getHostAddress()+":"+dp.getPort());
-            System.out.println("Datos del paquete:");
+            //System.out.println("Host remoto:"+dp.getAddress().getHostAddress()+":"+dp.getPort());
+            
             ois = new ObjectInputStream(new ByteArrayInputStream(dp.getData()));
             catalogo = (Catalogo)ois.readObject();
             catalogo.mostrarCatalogo();
@@ -138,7 +136,7 @@ public class Cliente {
             //s.close();
             
         }catch(IOException | ClassNotFoundException e){System.err.println(e);}
-        System.out.println("Termina el contenido del datagrama...");
+        System.out.println("Catalogo enviado...");
         return catalogo;
     }
     
@@ -165,14 +163,14 @@ public class Cliente {
             c.send(dp);
             oos.close();
         }catch(Exception e){System.err.println(e);}
-      System.out.println("Termina el contenido del datagrama...");
+      System.out.println("Carrito enviado...");
       
       
     }
     
-    public static void recibirCancion(Carrito carrito){
+    public static void recibirCancion(Carrito carrito, DatagramSocket socket){
         try{
-            DatagramSocket socket = new DatagramSocket(8050);
+            //DatagramSocket socket = new DatagramSocket(8050);
             byte[] receiveFileName = new byte[1024]; 
             for(int a =0; a<carrito.Canciones.size();a++){
                 DatagramPacket receiveFileNamePacket = new DatagramPacket(receiveFileName, receiveFileName.length);

@@ -121,12 +121,12 @@ public class Servidor {
                 File f = new File(carrito.Canciones.get(i).path);//new File("catalogo\\Sparks.mp3");
                 fileName = f.getName();
                 byte[] fileNameBytes = fileName.getBytes(); // File name as bytes to send it
-                DatagramPacket fileStatPacket = new DatagramPacket(fileNameBytes, fileNameBytes.length, address, 8050); // File name packet
+                DatagramPacket fileStatPacket = new DatagramPacket(fileNameBytes, fileNameBytes.length, address, 8001); // File name packet
                 
                 socket.send(fileStatPacket); // Sending the packet with the file name
 
                 byte[] fileByteArray = readFileToByteArray(f); // Array of bytes the file is made of
-                sendFile(socket, fileByteArray, address, 8050);
+                sendFile(socket, fileByteArray, address, 8001);
             }catch(Exception e){
                 System.out.println(e);
             }
