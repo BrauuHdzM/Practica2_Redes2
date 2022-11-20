@@ -37,29 +37,31 @@ public class Cliente {
         
         while(varSalir){
             conexion(ptoDst, dirDst, s);
-            Catalogo catalogo = getCatalogo(s);//esta variable debe de ser asignada al catalogo que se reciba del servidor       
+            Catalogo catalogo = getCatalogo(s);    
             Carrito carrito = new Carrito();
             boolean varSalir2 =true;
             while(varSalir2){
-            switch(menu()){
-                
-                case 1:
-                    
-                    catalogo.mostrarCatalogo();
-                break;
-                case 2:
-                    catalogo.mostrarCatalogo();
-                    System.out.println("Ingresa Id de la cancion:");
-                    carrito.agregarCancion(catalogo,(new Scanner(System.in).nextInt()));
-                    carrito.mostrarCarrito();
-                break;
-                case 3:
-                    varSalir2 = menuCarrito(carrito, s);
-                break;
-                case 4:
-                    varSalir=false;
-                 
-            }
+                switch(menu()){
+
+                    case 1:
+
+                        catalogo.mostrarCatalogo();
+                    break;
+                    case 2:
+                        catalogo.mostrarCatalogo();
+                        System.out.println("Ingresa Id de la cancion:");
+                        carrito.agregarCancion(catalogo,(new Scanner(System.in).nextInt()));
+                        carrito.mostrarCarrito();
+                    break;
+                    case 3:
+                        carrito.mostrarCarrito();
+                        varSalir2 = menuCarrito(carrito, s);
+                    break;
+                    case 4:
+                        varSalir=false;
+                        varSalir2=false;
+
+                }
             }
         }
         
@@ -110,45 +112,42 @@ public class Cliente {
         byte[]b = msj.getBytes();
         DatagramPacket p= new DatagramPacket(b,b.length,dst,pto);
         cl.send(p);
-        System.out.println("Solicitud de conexion enviada");
+        //System.out.println("Solicitud de conexion enviada");
     }
     
     public static Catalogo getCatalogo(DatagramSocket s){
-        //int puerto = 8000;
+        
         DatagramPacket dp= null;
-        //DatagramSocket s = null;
+        
         ObjectInputStream ois = null;
         Catalogo catalogo =null;
 
         try{
-            //s = new DatagramSocket(puerto);
-            System.out.println("Recibiendo catalogo...");
+            //System.out.println("Recibiendo catalogo...");
             
             dp = new DatagramPacket(new byte[1024],1024);
             s.receive(dp);
-            //System.out.println("Host remoto:"+dp.getAddress().getHostAddress()+":"+dp.getPort());
             
             ois = new ObjectInputStream(new ByteArrayInputStream(dp.getData()));
             catalogo = (Catalogo)ois.readObject();
             catalogo.mostrarCatalogo();
             ois.close();
             
-            //s.close();
             
         }catch(IOException | ClassNotFoundException e){System.err.println(e);}
-        System.out.println("Catalogo enviado...");
+        //System.out.println("Catalogo enviado...");
         return catalogo;
     }
     
     public static void enviarCarrito(Carrito carrito, DatagramSocket c){
         int puerto = 8000;
         DatagramPacket dp= null;
-        //DatagramSocket c = null;
+        
         ObjectOutputStream oos=null;
         ByteArrayOutputStream bos=null;
 
         try{
-            //c = new DatagramSocket();
+            
             dp = new DatagramPacket(new byte[1024],1024);
             InetAddress direccion = InetAddress.getByName("127.0.0.1");
             dp.setAddress(direccion);
@@ -163,7 +162,7 @@ public class Cliente {
             c.send(dp);
             oos.close();
         }catch(Exception e){System.err.println(e);}
-      System.out.println("Carrito enviado...");
+      //System.out.println("Carrito enviado...");
       
       
     }
@@ -177,11 +176,14 @@ public class Cliente {
                 socket.receive(receiveFileNamePacket); 
 
                 byte [] data = receiveFileNamePacket.getData(); 
-                String fileName = new String(data, 0, receiveFileNamePacket.getLength()); // Converting the name to string
+                String fileName = new String(data, 0, receiveFileNamePacket.getLength()); 
 
                 File f = new File ("libreria\\" + fileName); 
                 FileOutputStream outToFile = new FileOutputStream(f);
+                System.out.println("-------------------------");
+                System.out.println("Descargando: "+fileName);
                 receiveFile(outToFile, socket);
+                //System.out.println("-------------------------");
             }
         }catch(Exception e){
             System.out.println(e);
@@ -191,51 +193,45 @@ public class Cliente {
     
     
     private static void receiveFile(FileOutputStream outToFile, DatagramSocket socket) throws IOException {
-        System.out.println("Receiving file");
-        boolean flag; // Have we reached end of file
-        int sequenceNumber = 0; // Order of sequences
-        int foundLast = 0; // The las sequence found
+        
+        boolean flag; 
+        int sequenceNumber = 0; 
+        int foundLast = 0; 
         
         while (true) {
-            byte[] message = new byte[1024]; // Where the data from the received datagram is stored
-            byte[] fileByteArray = new byte[1021]; // Where we store the data to be writen to the file
+            byte[] message = new byte[1024];
+            byte[] fileByteArray = new byte[1021]; 
 
-            // Receive packet and retrieve the data
+            
             DatagramPacket receivedPacket = new DatagramPacket(message, message.length);
             socket.receive(receivedPacket);
-            message = receivedPacket.getData(); // Data to be written to the file
+            message = receivedPacket.getData(); 
 
-            // Get port and address for sending acknowledgment
             InetAddress address = receivedPacket.getAddress();
             int port = receivedPacket.getPort();
 
-            // Retrieve sequence number
+            
             sequenceNumber = ((message[0] & 0xff) << 8) + (message[1] & 0xff);
-            // Check if we reached last datagram (end of file)
+            
             flag = (message[2] & 0xff) == 1;
             
-            // If sequence number is the last seen + 1, then it is correct
-            // We get the data from the message and write the ack that it has been received correctly
             if (sequenceNumber == (foundLast + 1)) {
 
-                // set the last sequence number to be the one we just received
+                
                 foundLast = sequenceNumber;
-
-                // Retrieve data from message
                 System.arraycopy(message, 3, fileByteArray, 0, 1021);
 
-                // Write the retrieved data to the file and print received data sequence number
                 outToFile.write(fileByteArray);
-                System.out.println("Received: Sequence number:" + foundLast);
+                //System.out.println("Recibido: paquete num:" + foundLast);
 
-                // Send acknowledgement
+                // Envio ack
                 sendAck(foundLast, socket, address, port);
             } else {
-                System.out.println("Expected sequence number: " + (foundLast + 1) + " but received " + sequenceNumber + ". DISCARDING");
-                // Re send the acknowledgement
+                
+                // Reenvio de ack
                 sendAck(foundLast, socket, address, port);
             }
-            // Check for last datagram
+            
             if (flag) {
                 outToFile.close();
                 break;
@@ -244,14 +240,14 @@ public class Cliente {
     }    
     
     private static void sendAck(int foundLast, DatagramSocket socket, InetAddress address, int port) throws IOException {
-        // send acknowledgement
+        
         byte[] ackPacket = new byte[2];
         ackPacket[0] = (byte) (foundLast >> 8);
         ackPacket[1] = (byte) (foundLast);
-        // the datagram packet to be sent
+        
         DatagramPacket acknowledgement = new DatagramPacket(ackPacket, ackPacket.length, address, port);
         socket.send(acknowledgement);
-        System.out.println("Sent ack: Sequence Number = " + foundLast);
+        //System.out.println("Enviando ack: paquete num = " + foundLast);
     }
 }
     

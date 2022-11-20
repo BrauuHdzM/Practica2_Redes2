@@ -25,11 +25,8 @@ public class Servidor {
     public static void main(String[] args) throws SocketException{
         
         
-        int pto=8000;
-        DatagramSocket s = new DatagramSocket(pto);
+        DatagramSocket s = new DatagramSocket(8000);
         s.setReuseAddress(true);
-        
-        
         while(true){
             try{  
                 
@@ -39,13 +36,12 @@ public class Servidor {
                 sendCanciones(getCarrito(s));
             }catch(Exception e){
                 e.printStackTrace();
-            }//catch
+            }
         }
     }
     
     public static void waitConnection(DatagramSocket s) throws SocketException, IOException{
         
-        //s.setReuseAddress(true);
         String msj="";
         
         System.out.println("Servidor iniciado... espedando conexion..");
@@ -59,7 +55,6 @@ public class Servidor {
     public static void enviarCatalogo(DatagramSocket c ){
         int puerto = 8001;
         DatagramPacket dp= null;
-        //DatagramSocket c = null;
         ObjectOutputStream oos=null;
         ByteArrayOutputStream bos=null;
         Catalogo catalogo =null;
@@ -88,26 +83,22 @@ public class Servidor {
     public static Carrito getCarrito(DatagramSocket s){
         int puerto = 8001;
         DatagramPacket dp= null;
-        //DatagramSocket s = null;
-        //ObjectOutputStream oos=null;
         ObjectInputStream ois = null;
-        //ByteArrayInputStream bis;
         Carrito carrito =null;
 
         try{
-            //s = new DatagramSocket(puerto);
             System.out.println("Esperando Carrito...");
             
             dp = new DatagramPacket(new byte[1024],1024);
             s.receive(dp);
             ois = new ObjectInputStream(new ByteArrayInputStream(dp.getData()));
             carrito = (Carrito)ois.readObject();
-            System.out.println("Carrito recibido");
+            
             ois.close();
             
             
         }catch(IOException | ClassNotFoundException e){System.err.println(e);}
-        System.out.println("Termina el contenido del datagrama...");
+        System.out.println("Carrito recibido");
         return carrito;
 
 }
@@ -118,14 +109,14 @@ public class Servidor {
                 DatagramSocket socket = new DatagramSocket();
                 InetAddress address = InetAddress.getByName("127.0.0.1");
                 String fileName;
-                File f = new File(carrito.Canciones.get(i).path);//new File("catalogo\\Sparks.mp3");
+                File f = new File(carrito.Canciones.get(i).path);
                 fileName = f.getName();
-                byte[] fileNameBytes = fileName.getBytes(); // File name as bytes to send it
+                byte[] fileNameBytes = fileName.getBytes(); 
                 DatagramPacket fileStatPacket = new DatagramPacket(fileNameBytes, fileNameBytes.length, address, 8001); // File name packet
                 
-                socket.send(fileStatPacket); // Sending the packet with the file name
+                socket.send(fileStatPacket); 
 
-                byte[] fileByteArray = readFileToByteArray(f); // Array of bytes the file is made of
+                byte[] fileByteArray = readFileToByteArray(f); 
                 sendFile(socket, fileByteArray, address, 8001);
             }catch(Exception e){
                 System.out.println(e);
@@ -134,61 +125,62 @@ public class Servidor {
     }
     
     private static void sendFile(DatagramSocket socket, byte[] fileByteArray, InetAddress address, int port) throws IOException {
-        System.out.println("Sending file");
-        int sequenceNumber = 0; // For order
-        boolean flag; // To see if we got to the end of the file
-        int ackSequence = 0; // To see if the datagram was received correctly
+        System.out.println("Enviando archivo");
+        int sequenceNumber = 0; 
+        boolean flag; 
+        int ackSequence = 0; 
 
         for (int i = 0; i < fileByteArray.length; i = i + 1021) {
             sequenceNumber += 1;
 
-            // Create message
-            byte[] message = new byte[1024]; // First two bytes of the data are for control (datagram integrity and order)
+            byte[] message = new byte[1024]; 
             message[0] = (byte) (sequenceNumber >> 8);
             message[1] = (byte) (sequenceNumber);
 
-            if ((i + 1021) >= fileByteArray.length) { // Have we reached the end of file?
+            if ((i + 1021) >= fileByteArray.length) { 
                 flag = true;
-                message[2] = (byte) (1); // We reached the end of the file (last datagram to be send)
+                message[2] = (byte) (1); // Recibio archivo
             } else {
                 flag = false;
-                message[2] = (byte) (0); // We haven't reached the end of the file, still sending datagrams
+                message[2] = (byte) (0); // No recibio archivo
             }
 
             if (!flag) {
                 System.arraycopy(fileByteArray, i, message, 3, 1021);
-            } else { // If it is the last datagram
+            } else { 
                 System.arraycopy(fileByteArray, i, message, 3, fileByteArray.length - i);
             }
 
-            DatagramPacket sendPacket = new DatagramPacket(message, message.length, address, port); // The data to be sent
-            socket.send(sendPacket); // Sending the data
-            System.out.println("Sent: Sequence number = " + sequenceNumber);
+            DatagramPacket sendPacket = new DatagramPacket(message, message.length, address, port); 
+            socket.send(sendPacket); 
+            System.out.println("Enviando: paquete num = " + sequenceNumber);
+            
+            System.out.println("Progreso: "+i+"/"+fileByteArray.length);
 
-            boolean ackRec; // Was the datagram received?
+            boolean ackRec; 
 
             while (true) {
-                byte[] ack = new byte[2]; // Create another packet for datagram ackknowledgement
+                byte[] ack = new byte[2]; 
                 DatagramPacket ackpack = new DatagramPacket(ack, ack.length);
 
                 try {
-                    socket.setSoTimeout(50); // Waiting for the server to send the ack
+                    socket.setSoTimeout(50); 
                     socket.receive(ackpack);
-                    ackSequence = ((ack[0] & 0xff) << 8) + (ack[1] & 0xff); // Figuring the sequence number
-                    ackRec = true; // We received the ack
+                    ackSequence = ((ack[0] & 0xff) << 8) + (ack[1] & 0xff);
+                    ackRec = true; 
                 } catch (SocketTimeoutException e) {
-                    System.out.println("Socket timed out waiting for ack");
-                    ackRec = false; // We did not receive an ack
+                    System.out.println("El socket termino de esperar");
+                    ackRec = false; 
                 }
 
-                // If the package was received correctly next packet can be sent
+                
                 if ((ackSequence == sequenceNumber) && (ackRec)) {
-                    System.out.println("Ack received: Sequence Number = " + ackSequence);
+                    System.out.println("Ack recibido: paquete num = " + ackSequence);
                     break;
-                } // Package was not received, so we resend it
+                } 
                 else {
                     socket.send(sendPacket);
-                    System.out.println("Resending: Sequence Number = " + sequenceNumber);
+                    System.out.println("Reenviando: paquete num = " + sequenceNumber);
                 }
             }
         }
@@ -196,8 +188,6 @@ public class Servidor {
   
     private static byte[] readFileToByteArray(File file) {
         FileInputStream fis = null;
-        // Creating a byte array using the length of the file
-        // file.length returns long which is cast to int
         byte[] bArray = new byte[(int) file.length()];
         try {
             fis = new FileInputStream(file);
